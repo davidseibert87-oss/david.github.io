@@ -1,2 +1,181 @@
 # david.github.io
 Geburtstagsgruß
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🎉 Digitale Geburtstagskarte</title>
+  <meta name="description" content="Animierte Geburtstagskarte zum Personalisieren" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background-color: white;
+      color: #fff;
+      overflow-y: auto;
+    }
+    @keyframes glitter {
+      to { background-position: 200% center; }
+    }
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .side-60 {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 7rem;
+      font-weight: bold;
+      color: gold;
+      animation: rotate 6s linear infinite;
+      pointer-events: none;
+    }
+    .side-60.left { left: -100px; }
+    .side-60.right { right: -100px; }
+    main {
+      position: relative;
+      z-index: 3;
+      max-width: 800px;
+      margin: 5vh auto;
+      background: rgba(0,0,0,0.5);
+      padding: 20px;
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+    }
+    h1 {
+      font-size: 2.5rem;
+      color: gold;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .message {
+      font-size: 1.2rem;
+      line-height: 1.5;
+      white-space: pre-line;
+      color: gold;
+      font-style: italic;
+    }
+    .highlight-text {
+      font-size: 1.3rem;
+      text-align: center;
+      margin: 20px 0;
+      color: #ffdb58;
+      font-weight: bold;
+    }
+    figure {
+      margin: 0;
+      position: relative;
+    }
+    figure img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+    }
+    figure figcaption {
+      margin-top: 8px;
+      text-align: center;
+      font-style: italic;
+      color: #ddd;
+    }
+    canvas#fireworks {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="fireworks"></canvas>
+  <main>
+    <h1>Liebe Jeannette</h1>
+    <div class="message">
+      heute feiern wir deinen besonderen Geburtstag an diesem herausragenden Ort!  
+      Danke dafür, wie auch für all die anderen Dinge die du für mich und uns als LöwenMoma übernimmst und uns unterstützt.
+      Das ist klasse und wir sind sehr sehr dankbar dafür, dass wir dich haben.
+      Ich denke es ist Zeit diesen Ort aufzusuchen.
+    </div>
+
+    <figure>
+      <span class="side-60 left">60</span>
+      <img src="https://www.berlin.de/ba-charlottenburg-wilmersdorf/ueber-den-bezirk/kultur-und-wissenschaft/buehnen/schaubuehne-am-lehniner-platz-2.jpg"
+           alt="Schaubühne am Lehniner Platz">
+      <span class="side-60 right">60</span>
+    </figure>
+
+    <p class="highlight-text">AM 29.09, 20:00 UHR HAST DU ZWEI KARTEN FÜR</p>
+
+    <a href="https://www.schaubuehne.de/de/produktionen/orlando.html" target="_blank" style="text-decoration:none;">
+      <figure>
+        <img src="https://www.schaubuehne.de/uploads/migration/galerien/__Startseitenbilder/Orlando_Kopie/k1600_pr8a0482_copystephencummiskey.jpg?1600_900"
+             alt="Orlando – zur Seite Schaubühne">
+        <figcaption>Mehr zur Inszenierung „Orlando“ auf Schaubühne.de</figcaption>
+      </figure>
+    </a>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+    addEventListener('resize', ()=>{
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+    });
+    class Particle {
+      constructor(x, y, color, vel) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.vel = vel;
+        this.alpha = 1;
+        this.size = Math.random() * 3 + 2;
+      }
+      update() {
+        this.x += this.vel.x;
+        this.y += this.vel.y;
+        this.vel.y += 0.02;
+        this.alpha -= 0.01;
+      }
+      draw() {
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    let particles = [];
+    function createFirework() {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height * 0.5;
+      const colors = ['#ff0', '#f0f', '#0ff', '#f90', '#0f0'];
+      const count = 80;
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count;
+        const speed = Math.random() * 3 + 2;
+        particles.push(new Particle(x, y, colors[Math.floor(Math.random()*colors.length)], {
+          x: Math.cos(angle) * speed,
+          y: Math.sin(angle) * speed
+        }));
+      }
+    }
+    function animate() {
+      ctx.fillStyle = 'rgba(0,0,0,0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p, i) => {
+        p.update();
+        p.draw();
+        if (p.alpha <= 0) particles.splice(i, 1);
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+    setInterval(createFirework, 1500);
+  </script>
+</body>
+</html>
